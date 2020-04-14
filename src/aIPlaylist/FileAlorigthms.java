@@ -37,7 +37,6 @@ public class FileAlorigthms {
 						mediafiles.add(files[i]);
 					} 
 				} else if(files[i].isDirectory() && subDirectories) {
-					// Recursive call
 					tempMediaFiles = (getMediaFiles(files[i], subDirectories));
 					for(int k = 0; k < tempMediaFiles.length; k++) {
 						mediafiles.add(tempMediaFiles[k]);
