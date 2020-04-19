@@ -27,7 +27,7 @@ public class RandomPlaylist implements Serializable {
 	 * @throws IllegalArgumentException if there are not at least two media files in folder.
 	 * @throws IllegalArgumentException if folder is not a directory.
 	 */
-	public RandomPlaylist(File folder, boolean subDirectories) throws Exception{
+	public RandomPlaylist(File folder, boolean subDirectories) {
 		if(!folder.isDirectory())
 			throw new IllegalArgumentException("File folder must be a directory");
 		Set<File> files = new HashSet<File>(FileAlorigthms.getMediaFiles(folder, subDirectories));

@@ -16,13 +16,13 @@ import aIPlaylist.AIPlaylist;
 public class WatchSerciveThread extends Thread {
 	
 	// Reference for callback
-	AIPlaylist playlist;
+	final AIPlaylist playlist;
 	 
 	// WatchService to poll for events
-	WatchService watchService;
+	final WatchService watchService;
 	
 	// Whether or not sub-directories get checked
-	boolean subDirectories;
+	final boolean subDirectories;
 	
 	/**       Creates a custom Thread used to poll for WatchService events triggered by FileSystem modification.
 	 * @param playlist as the AIPlayist that contains the callback method for updating.
@@ -42,8 +42,7 @@ public class WatchSerciveThread extends Thread {
 			try {
 				wk = watchService.take();
 				for (WatchEvent<?> event: wk.pollEvents()) {
-			        WatchEvent.Kind<?> kind = event.kind();
-			        if(kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+			        if(event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
 						playlist.checkPlaylistFiles();
 			        }
 				}
@@ -53,6 +52,7 @@ public class WatchSerciveThread extends Thread {
 				Thread.currentThread().interrupt();
 			}
 		}
+		Thread.currentThread().interrupt();
 		playlist.watchServiceThreadInterrupted();
 	}
 

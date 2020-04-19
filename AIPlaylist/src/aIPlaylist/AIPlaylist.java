@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchService;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -47,6 +48,7 @@ import listeners.AIPWindowAdapter;
 import listeners.OpenFolderMenuItemListener;
 import listeners.SubDirectoriesCheckBoxMenuItemListener;
 import listeners.WatchSerciveThread;
+
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.medialist.MediaList;
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
@@ -134,6 +136,7 @@ public class AIPlaylist {
 	private final SubDirectoriesCheckBoxMenuItemListener subDirectoriesCheckBoxListener = new SubDirectoriesCheckBoxMenuItemListener(this);
 	private final AIPWindowAdapter aIPWindowAdapter = new AIPWindowAdapter(this);
 	private final AIPKeyListener keyListener = new AIPKeyListener(this);
+
 	private WatchService watchService;
 	private ExecutorService executionService = Executors.newSingleThreadExecutor();
 
@@ -194,7 +197,7 @@ public class AIPlaylist {
 		new NativeDiscovery().discover();
 		loadSettings();
 		loadPlaylist(); 
-		getTopMedia();
+		//getTopMedia();
 		setUpJMenu();
 		setUpJFrame();
 		setUpMediaPlayer();
@@ -391,11 +394,8 @@ public class AIPlaylist {
 				}
 			} else if(playlist == null) {
 				aIPlaylistLogger.finest("Creating new playlist");
-				try {
-					playlist = new RandomPlaylist(folder, subDirectories);
-				} catch (Exception e) {
+				playlist = new RandomPlaylist(folder, subDirectories);
 
-				}
 			}
 			registerFileListener();
 		}
@@ -455,6 +455,7 @@ public class AIPlaylist {
 		aIPlaylistLogger.finest("Media player started");
 		started = true;
 		addMedia();
+		aIPlaylistLogger.finest("Playing first from start");
 		mediaListPlayer.controls().play(0);
 		printPreviousIndex();
 	}
@@ -463,12 +464,13 @@ public class AIPlaylist {
 	 * 
 	 */
 	public void playNext() {
-		if(!previousFilesIterator.hasNext() && !looping && !repeating) 
+		if(!previousFilesIterator.hasNext() && !looping && !repeating) {
 			addMedia();
+		}
 		else  
 			iteratorNext();
 		aIPlaylistLogger.finest("Playing next");
-		mediaListPlayer.controls().playNext();
+		mediaListPlayer.controls().play(previousFilesIterator.previousIndex());
 		printPreviousIndex();
 	}
 
@@ -491,10 +493,10 @@ public class AIPlaylist {
 	 * 
 	 */
 	private void addMedia() {
-		aIPlaylistLogger.finest("Adding media");
 		File f = playlist.getProbFun().fun();
+		aIPlaylistLogger.finest("Adding " + f.getName() + " to mediaList and previousFileIterator");
 		mediaList.media().add((f).getAbsolutePath(), "");
-		previousFilesIterator.add(f);		
+		previousFilesIterator.add(f);
 	}
 
 	/** Decrements the iterator.
@@ -636,7 +638,6 @@ public class AIPlaylist {
 		} else {
 			iteratorNext();
 		}
-
 	}
 
 	/** Called when the MediaListPlayer is finished.
@@ -645,7 +646,7 @@ public class AIPlaylist {
 	public void mediaListPlayerFinished() {
 		aIPlaylistLogger.finest("MediaListPlayer Finished");
 		if(!previousFilesIterator.hasNext() && looping) {
-			aIPlaylistLogger.finest("Playing 1st");
+			aIPlaylistLogger.finest("Playing first from MediaListPlayerFinished");
 			mediaListPlayer.controls().play(0);
 		} else {
 			playNext();		
@@ -772,7 +773,9 @@ public class AIPlaylist {
 			e.printStackTrace();
 		}
 		try {
-			watchService.close();
+			if(watchService != null) {
+				watchService.close();
+			}
 		} catch (IOException e) {
 			System.out.print(String.format("Problem shutting down WatchService\n"));
 			e.printStackTrace();
